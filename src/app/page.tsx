@@ -63,6 +63,14 @@ export default function Home() {
     setNewIngredient({ name: '', amount: 1, unit: '' });
   };
 
+  const handleDeleteIngredient = (ingredientName: string) => {
+    const newBaseRecipe = { ...baseRecipe };
+    delete newBaseRecipe[ingredientName];
+    setBaseRecipe(newBaseRecipe);
+    const newCalculatedRecipe = calcRecipe(newBaseRecipe, numberOfPeople);
+    setCalculatedRecipe(newCalculatedRecipe);
+  };
+
   const formatAmount = (amount: number, unit: string): string => {
     if (unit === '小さじ' && amount >= 3) {
       const oosaji = Math.floor(amount / 3);
@@ -90,6 +98,7 @@ export default function Home() {
             {Object.entries(calculatedRecipe).map(([ingredient, { amount, unit }]) => (
               <li key={ingredient}>
                 {ingredient}: {formatAmount(amount, unit)}
+                <button onClick={() => handleDeleteIngredient(ingredient)}>削除</button>
               </li>
             ))}
           </ul>
