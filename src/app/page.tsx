@@ -6,33 +6,40 @@ type Recipe = {
   [key: string]: { amount: number; unit: string };
 };
 
-const baseRecipe: Recipe = {
-  薄力粉: { amount: 100, unit: 'g' },
-  砂糖: { amount: 50, unit: 'g' },
-  卵: { amount: 1, unit: '個' },
-  塩: { amount: 2, unit: '小さじ' },
-};
-
 export default function Home() {
+  const [baseRecipe, setBaseRecipe] = useState<Recipe>({
+    薄力粉: { amount: 100, unit: 'g' },
+    砂糖: { amount: 50, unit: 'g' },
+    卵: { amount: 1, unit: '個' },
+    塩: { amount: 2, unit: '小さじ' },
+  });
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [calculatedRecipe, setCalculatedRecipe] = useState<Recipe>(baseRecipe);
 
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    {
-      const num = parseInt(e.target.value, 10);
-      const newRecipe: Recipe = {};
-      if (!isNaN(num) && num > 0) {
-        for (const ingredient in baseRecipe) {
-          const baseAmount = baseRecipe[ingredient];
-          const calculatedAmount = baseAmount.amount * num;
-          newRecipe[ingredient] = { amount: calculatedAmount, unit: baseAmount.unit };
-        }
-        setCalculatedRecipe(newRecipe);
-        setNumberOfPeople(num);
-      } else {
-        setCalculatedRecipe(baseRecipe);
-        setNumberOfPeople(1);
+  const calcRecipe = (base: Recipe, num: number): Recipe => {
+    const newRecipe: Recipe = {};
+    if (!isNaN(num) && num > 0) {
+      for (const ingredient in base) {
+        const baseAmount = base[ingredient];
+        const calculatedAmount = baseAmount.amount * num;
+        newRecipe[ingredient] = { amount: calculatedAmount, unit: baseAmount.unit };
       }
+      return newRecipe;
+    } else {
+      return baseRecipe;
+    }
+  };
+
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const num = parseInt(e.target.value, 10);
+    if (!isNaN(num) && num > 0) {
+      const newRecipe = calcRecipe(baseRecipe, num);
+      setCalculatedRecipe(newRecipe);
+      setNumberOfPeople(num);
+    } else {
+      const newRecipe = calcRecipe(baseRecipe, 1);
+      setCalculatedRecipe(newRecipe);
+      setNumberOfPeople(1);
     }
   };
 
