@@ -94,15 +94,15 @@ export default function Home() {
         <div>
           <label>人数: </label>
           <input type="number" value={numberOfPeople} onChange={handleNumberChange} min="1" />
-          <ul>
+          <ul className={styles.recipeList}>
             {Object.entries(calculatedRecipe).map(([ingredient, { amount, unit }]) => (
-              <li key={ingredient}>
+              <li key={ingredient} className={styles.listItem}>
                 {ingredient}: {formatAmount(amount, unit)}
                 <button onClick={() => handleDeleteIngredient(ingredient)}>削除</button>
               </li>
             ))}
           </ul>
-          <div>
+          <div className={styles.addForm}>
             <input
               type="text"
               placeholder="材料名"
@@ -119,9 +119,10 @@ export default function Home() {
               placeholder="量"
               value={newIngredient.amount}
               onChange={(e) => {
+                const num = parseInt(e.target.value, 10);
                 setNewIngredient({
                   ...newIngredient,
-                  amount: parseInt(e.target.value, 10),
+                  amount: isNaN(num) ? 0 : num,
                 });
               }}
             />
