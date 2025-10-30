@@ -3,18 +3,54 @@ import { useState } from 'react';
 import styles from './page.module.css';
 
 type Recipe = {
-  [key: string]: number;
+  [key: string]: { amount: number; unit: string };
 };
 
 const baseRecipe: Recipe = {
-  薄力粉: 100,
-  砂糖: 50,
-  卵: 1,
+  薄力粉: { amount: 100, unit: 'g' },
+  砂糖: { amount: 50, unit: 'g' },
+  卵: { amount: 1, unit: '個' },
+  塩: { amount: 2, unit: '小さじ' },
 };
 
 export default function Home() {
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [calculatedRecipe, setCalculatedRecipe] = useState<Recipe>(baseRecipe);
+
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    {
+      const num = parseInt(e.target.value, 10);
+      const newRecipe: Recipe = {};
+      if (!isNaN(num) && num > 0) {
+        for (const ingredient in baseRecipe) {
+          const baseAmount = baseRecipe[ingredient];
+          const calculatedAmount = baseAmount.amount * num;
+          newRecipe[ingredient] = { amount: calculatedAmount, unit: baseAmount.unit };
+        }
+        setCalculatedRecipe(newRecipe);
+        setNumberOfPeople(num);
+      } else {
+        setCalculatedRecipe(baseRecipe);
+        setNumberOfPeople(1);
+      }
+    }
+  };
+
+  const formatAmount = (amount: number, unit: string): string => {
+    if (unit === '小さじ' && amount >= 3) {
+      const oosaji = Math.floor(amount / 3);
+      const kosaji = amount % 3;
+      if (kosaji === 0) {
+        return `大さじ ${oosaji}`;
+      } else {
+        return `大さじ ${oosaji} 小さじ ${kosaji}`;
+      }
+    }
+    if (unit === '小さじ' || unit === '大さじ') {
+      return `${unit} ${amount}`;
+    }
+    return `${amount} ${unit}`;
+  };
 
   return (
     <div className={styles.container}>
@@ -22,31 +58,11 @@ export default function Home() {
         <h1 className={styles.title}>レシピ計算機</h1>
         <div>
           <label>人数: </label>
-          <input
-            type="number"
-            value={numberOfPeople}
-            onChange={(e) => {
-              const num = parseInt(e.target.value, 10);
-              const newRecipe: Recipe = {};
-              if (!isNaN(num) && num > 0) {
-                for (const ingredient in baseRecipe) {
-                  const baseAmount = baseRecipe[ingredient];
-                  const calculatedAmount = baseAmount * num;
-                  newRecipe[ingredient] = calculatedAmount;
-                }
-                setCalculatedRecipe(newRecipe);
-                setNumberOfPeople(num);
-              } else {
-                setCalculatedRecipe(baseRecipe);
-                setNumberOfPeople(1);
-              }
-            }}
-            min="1"
-          />
+          <input type="number" value={numberOfPeople} onChange={handleNumberChange} min="1" />
           <ul>
-            {Object.entries(calculatedRecipe).map(([ingredient, amount]) => (
+            {Object.entries(calculatedRecipe).map(([ingredient, { amount, unit }]) => (
               <li key={ingredient}>
-                {ingredient}: {amount}
+                {ingredient}: {formatAmount(amount, unit)}
               </li>
             ))}
           </ul>
