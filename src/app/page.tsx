@@ -15,6 +15,11 @@ export default function Home() {
   });
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [calculatedRecipe, setCalculatedRecipe] = useState<Recipe>(baseRecipe);
+  const [newIngredient, setNewIngredient] = useState({
+    name: '',
+    amount: 1,
+    unit: '',
+  });
 
   const calcRecipe = (base: Recipe, num: number): Recipe => {
     const newRecipe: Recipe = {};
@@ -41,6 +46,21 @@ export default function Home() {
       setCalculatedRecipe(newRecipe);
       setNumberOfPeople(1);
     }
+  };
+
+  const handleAddNewIngredient = () => {
+    if (!newIngredient.name) return;
+    const newBaseRecipe: Recipe = {
+      ...baseRecipe,
+      [newIngredient.name]: {
+        amount: newIngredient.amount,
+        unit: newIngredient.unit,
+      },
+    };
+    setBaseRecipe(newBaseRecipe);
+    const newCalculatedRecipe = calcRecipe(newBaseRecipe, numberOfPeople);
+    setCalculatedRecipe(newCalculatedRecipe);
+    setNewIngredient({ name: '', amount: 1, unit: '' });
   };
 
   const formatAmount = (amount: number, unit: string): string => {
@@ -73,6 +93,42 @@ export default function Home() {
               </li>
             ))}
           </ul>
+          <div>
+            <input
+              type="text"
+              placeholder="材料名"
+              value={newIngredient.name}
+              onChange={(e) => {
+                setNewIngredient({
+                  ...newIngredient,
+                  name: e.target.value,
+                });
+              }}
+            />
+            <input
+              type="number"
+              placeholder="量"
+              value={newIngredient.amount}
+              onChange={(e) => {
+                setNewIngredient({
+                  ...newIngredient,
+                  amount: parseInt(e.target.value, 10),
+                });
+              }}
+            />
+            <input
+              type="text"
+              placeholder="単位(g, 個など)"
+              value={newIngredient.unit}
+              onChange={(e) => {
+                setNewIngredient({
+                  ...newIngredient,
+                  unit: e.target.value,
+                });
+              }}
+            />
+            <button onClick={handleAddNewIngredient}>追加</button>
+          </div>
         </div>
       </main>
     </div>
