@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './page.module.css';
 
 type Recipe = {
@@ -7,14 +7,16 @@ type Recipe = {
 };
 
 export default function Home() {
-  const [baseRecipe, setBaseRecipe] = useState<Recipe>({
+  const defaultRecipe: Recipe = {
     薄力粉: { amount: 100, unit: 'g' },
     砂糖: { amount: 50, unit: 'g' },
     卵: { amount: 1, unit: '個' },
     塩: { amount: 2, unit: '小さじ' },
-  });
+  };
+
+  const [baseRecipe, setBaseRecipe] = useState<Recipe>(defaultRecipe);
   const [numberOfPeople, setNumberOfPeople] = useState(1);
-  const [calculatedRecipe, setCalculatedRecipe] = useState<Recipe>(baseRecipe);
+  const [calculatedRecipe, setCalculatedRecipe] = useState<Recipe>(defaultRecipe);
   const [newIngredient, setNewIngredient] = useState({
     name: '',
     amount: 1,
@@ -25,6 +27,20 @@ export default function Home() {
     amount: 0,
     unit: '',
   });
+
+  useEffect(() => {
+    const savedRecipe = localStorage.getItem('myRecipe');
+    if (savedRecipe && savedRecipe !== 'null' && savedRecipe !== 'undefined') {
+      const loadedBaseRecipe = JSON.parse(savedRecipe) as Recipe;
+      setBaseRecipe(loadedBaseRecipe);
+      setCalculatedRecipe(calcRecipe(loadedBaseRecipe, numberOfPeople));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('myRecipe', JSON.stringify(baseRecipe));
+  }, [baseRecipe]);
 
   const calcRecipe = (base: Recipe, num: number): Recipe => {
     const newRecipe: Recipe = {};
