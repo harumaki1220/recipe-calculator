@@ -20,6 +20,11 @@ export default function Home() {
     amount: 1,
     unit: '',
   });
+  const [editingkey, setEditingKey] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    amount: 0,
+    unit: '',
+  });
 
   const calcRecipe = (base: Recipe, num: number): Recipe => {
     const newRecipe: Recipe = {};
@@ -71,6 +76,24 @@ export default function Home() {
     setCalculatedRecipe(newCalculatedRecipe);
   };
 
+  const handleEditClick = (key: string) => {
+    setEditingKey(key);
+    setEditFormData(baseRecipe[key]);
+  };
+
+  const handleEditCancel = () => {
+    setEditingKey(null);
+  };
+
+  const handleEditSave = (ingredientName: string) => {
+    const newBaseRecipe = { ...baseRecipe };
+    newBaseRecipe[ingredientName] = editFormData;
+    setBaseRecipe(newBaseRecipe);
+    const newCalculatedRecipe = calcRecipe(newBaseRecipe, numberOfPeople);
+    setCalculatedRecipe(newCalculatedRecipe);
+    setEditingKey(null);
+  };
+
   const formatAmount = (amount: number, unit: string): string => {
     if (unit === '小さじ' && amount >= 3) {
       const oosaji = Math.floor(amount / 3);
@@ -97,8 +120,44 @@ export default function Home() {
           <ul className={styles.recipeList}>
             {Object.entries(calculatedRecipe).map(([ingredient, { amount, unit }]) => (
               <li key={ingredient} className={styles.listItem}>
-                {ingredient}: {formatAmount(amount, unit)}
-                <button onClick={() => handleDeleteIngredient(ingredient)}>削除</button>
+                {editingkey === ingredient ? (
+                  <>
+                    <input
+                      type="number"
+                      value={editFormData.amount}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          amount: parseInt(e.target.value, 10) || 0,
+                        })
+                      }
+                    />
+                    <input
+                      type="text"
+                      value={editFormData.unit}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          unit: e.target.value,
+                        })
+                      }
+                    />
+                    <div>
+                      <button onClick={() => handleEditSave(ingredient)}>保存</button>
+                      <button onClick={handleEditCancel}>キャンセル</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span>
+                      {ingredient}: {formatAmount(amount, unit)}
+                    </span>
+                    <div>
+                      <button onClick={() => handleEditClick(ingredient)}>編集</button>
+                      <button onClick={() => handleDeleteIngredient(ingredient)}>削除</button>
+                    </div>
+                  </>
+                )}
               </li>
             ))}
           </ul>
